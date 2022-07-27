@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # create InstanceProfile wrapper on NodeRole
+  KarpenterNodeInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      #InstanceProfileName: "KarpenterNodeInstanceProfile"
+      InstanceProfileName: "KarpenterNodeRole-bp-suyagni-cstr"
+      Path: "/"
+      Roles:
+        - Ref: "KarpenterNodeRole"
+  # create role with basic permissions for EKS node
+  KarpenterNodeRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "KarpenterNodeRole"
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                !Sub "ec2.${AWS::URLSuffix}"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  MyLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        IamInstanceProfile:
+          # Get ARN of InstanceProfile defined above
+          Arn: !GetAtt
+            - KarpenterNodeInstanceProfile
+            - Arn
+        ImageId: ami-08860e13a24e46262
+        # UserData is Base64 Encoded
+        UserData: !Base64 >
+            #!/bin/bash
+            /etc/eks/bootstrap.sh 'bp-suyagni-cstr' \
+            --kubelet-extra-args '--node-labels=node.k8s.aws/capacity-type=spot' \
+            --b64-cluster-ca 'LS0t....0tCg==' \
+            --apiserver-endpoint 'https://B0385BE29EA792E811CB5866D23C856E.gr7.us-east-2.eks.amazonaws.com'
+        BlockDeviceMappings:
+          - Ebs:
+              VolumeSize: 80
+              VolumeType: gp3
+            DeviceName: /dev/xvda
+        # The SecurityGroup must be associated with the cluster VPC
+        SecurityGroupIds:
+          - sg-02d94074919fa2cc6
+      LaunchTemplateName: bp_KarpenterCustomLaunchTemplate
+
