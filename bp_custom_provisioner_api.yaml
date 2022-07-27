@@ -1,0 +1,12 @@
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: betterplacekarpenterprovisionerAPI
+spec:
+   provider:
+    launchTemplate: bp_CustomKarpenterLaunchTemplateDemo
+	subnetSelector: 
+	  karpenter.sh/discovery: ${CLUSTER_NAME}
+    securityGroupSelector:
+      karpenter.sh/discovery: ${CLUSTER_NAME}
+   ttlSecondsAfterEmpty: 30
