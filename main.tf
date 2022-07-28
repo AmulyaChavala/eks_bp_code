@@ -1,4 +1,4 @@
-variable "cluster_name" {
+/*variable "cluster_name" {
   description = "The name of the cluster"
   type        = string
   
@@ -7,17 +7,17 @@ variable "cluster_region"{
   description = "The name of the cluster"
   type        = string
   
-}
+}*/
        
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
-
-  name = var.cluster_name
-  cidr = "192.168.0.0/16"
+  vpc_id = var.vpc_id
+  name = "vpc-0a07b58eb023b79dd"
+  cidr = "10.100.32.0/20"
   
 
-  azs 	 		= ["ap-southeast-2a", "ap-southeast-2b"]
-  private_subnets 	= ["192.168.0.0/19", "192.168.128.0/19"]
+  azs 	 		= ["ap-south-1a", "ap-south-1b"]
+  private_subnets 	= ["10.100.16.0/20", "10.100.32.0/20"]
   public_subnets        = ["", ""]
   
   enable_nat_gateway     = true
@@ -25,7 +25,7 @@ module "vpc" {
   one_nat_gateway_per_az = false
 
   private_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "aj_bp"
+    "kubernetes.io/cluster/${var.cluster_name}" = "aj-b2c-backend-eks"
     "karpenter.sh/discovery" = var.cluster_name
   }
 }
@@ -43,8 +43,11 @@ module "eks" {
   worker_groups = [
     {
       instance_type = "m5x.large"
-      ami_id        = ""
-      asg_max_size  = 1
+      ami_id        = "ami-0e5a34cf98d7a8fec"
+      asg_desired_size  = 1
+      asg_max_size  = 2
+      asg_min_size  = 1
+
     }
   ]
   tags = {

@@ -4,7 +4,7 @@ metadata:
   name: betterplacekarpenterprovisionerAPI
 spec:
    provider:
-    launchTemplate: bp_CustomKarpenterLaunchTemplateDemo
+    launchTemplate: bp_KarpenterCustomLaunchTemplate
 	subnetSelector: 
 	  karpenter.sh/discovery: ${CLUSTER_NAME}
     securityGroupSelector:

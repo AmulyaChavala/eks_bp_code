@@ -4,8 +4,8 @@ Resources:
   KarpenterNodeInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
-      #InstanceProfileName: "KarpenterNodeInstanceProfile"
-      InstanceProfileName: "KarpenterNodeRole-bp-suyagni-cstr"
+      InstanceProfileName: "KarpenterNodeInstanceProfile"
+      #InstanceProfileName: "KarpenterNodeRole-bp-suyagni-cstr"
       Path: "/"
       Roles:
         - Ref: "KarpenterNodeRole"
@@ -38,7 +38,7 @@ Resources:
           Arn: !GetAtt
             - KarpenterNodeInstanceProfile
             - Arn
-        ImageId: ami-08860e13a24e46262
+        ImageId: ami-0e5a34cf98d7a8fec
         # UserData is Base64 Encoded
         UserData: !Base64 >
             #!/bin/bash
@@ -48,11 +48,11 @@ Resources:
             --apiserver-endpoint 'https://B0385BE29EA792E811CB5866D23C856E.gr7.us-east-2.eks.amazonaws.com'
         BlockDeviceMappings:
           - Ebs:
-              VolumeSize: 80
-              VolumeType: gp3
+              VolumeSize: 100
+              VolumeType: gp2
             DeviceName: /dev/xvda
         # The SecurityGroup must be associated with the cluster VPC
         SecurityGroupIds:
-          - sg-02d94074919fa2cc6
+          - sg-0c16696bca513d046
       LaunchTemplateName: bp_KarpenterCustomLaunchTemplate
 
